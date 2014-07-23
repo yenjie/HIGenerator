@@ -1,0 +1,12 @@
+# Get LHAPDF 5.9.1 (JEWEL doesn't work with 6.x for the moment)
+wget http://www.hepforge.org/archive/lhapdf/lhapdf-5.9.1.tar.gz
+tar xvfz lhapdf-5.9.1.tar.gz
+cd lhapdf-5.9.1
+./configure --prefix=$PWD/../local
+make -j 4
+make install
+cd ..
+
+#Setup Environment
+export LD_LIBRARY_PATH=$PWD/local/lib:$LD_LIBRARY_PATH
+make
