@@ -19,6 +19,7 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
+#include "HepMC/IO_HEPEVT.h"
 #include "HepMC/GenEvent.h"
 #include "HepMC/HeavyIon.h"
 #include "HepMC/SimpleVector.h"
@@ -30,6 +31,7 @@ using namespace edm;
 using namespace std;
 using namespace gen;
 
+HepMC::IO_HEPEVT hepevtio;
 
 JewelHadronizer::JewelHadronizer(const ParameterSet &pset) :
     BaseHadronizer(pset),
@@ -68,21 +70,21 @@ void JewelHadronizer::add_heavy_ion_rec(HepMC::GenEvent *evt)
 {
   // heavy ion record in the final CMSSW Event
   HepMC::HeavyIon* hi = new HepMC::HeavyIon(
-    himain1.jatt,                               // Ncoll_hard/N of SubEvents
-    himain1.np,                               // Npart_proj
-    himain1.nt,                               // Npart_targ
-    himain1.n0+himain1.n01+himain1.n10+himain1.n11, // Ncoll
+    0,                               // Ncoll_hard/N of SubEvents
+    0,                               // Npart_proj
+    0,                               // Npart_targ
+    0, // Ncoll
     0,                                   // spectator_neutrons
     0,                                   // spectator_protons
-    himain1.n01,                          // N_Nwounded_collisions
-    himain1.n10,                          // Nwounded_N_collisions
-    himain1.n11,                          // Nwounded_Nwounded_collisions
+    0,                          // N_Nwounded_collisions
+    0,                          // Nwounded_N_collisions
+    0,                          // Nwounded_Nwounded_collisions
     //gsfs Changed from 19 to 18 (Fortran counts from 1 , not 0) 
-    hiparnt.hint1[18],                   // impact_parameter in [fm]
-    phi0_,                               // event_plane_angle
+    0,                   // impact_parameter in [fm]
+    0,                               // event_plane_angle
     0,                                   // eccentricity
     //gsfs Changed from 12 to 11 (Fortran counts from 1 , not 0) 
-    hiparnt.hint1[11]                    // sigma_inel_NN
+    0                    // sigma_inel_NN
   );
   evt->set_heavy_ion(*hi);
   delete hi;
@@ -92,6 +94,7 @@ void JewelHadronizer::add_heavy_ion_rec(HepMC::GenEvent *evt)
 HepMC::GenParticle* JewelHadronizer::build_hijing(int index, int barcode)
 {
    // Build particle object corresponding to index in hijing
+
 /*                                                                                                                                                         
    double x0 = himain2.patt[0][index];
    double y0 = himain2.patt[1][index];
@@ -159,22 +162,34 @@ bool JewelHadronizer::generatePartonsAndHadronize()
 
    event().reset(evt);
 */
+   // generate a JEWEL event
+   static int j=0;
+   j++;
+   GENEVENT(j);
+   cout <<"Sounds good"<<endl;
+
+   call_pyhepc(1);
+   
+   HepMC::GenEvent* evt = hepevtio.read_next_event();
+
+   evt->set_signal_process_id(pypars.msti[0]);	 // type of the process
+   evt->set_event_scale(pypars.pari[16]);  	 // Q^2
+
+   //if(embedding_) rotateEvtPlane(evt,evtPlane_);
+   //add_heavy_ion_rec(evt);
+   event().reset(evt);
+
+   cout <<"Alive"<<endl;
+
+
    return true;
 }
 
 //_____________________________________________________________________  
 bool JewelHadronizer::get_particles(HepMC::GenEvent *evt )
-{
-      HepMC::GenVertex*  vertice;
+{      
 
-      vector<HepMC::GenParticle*> particles;
-      vector<int>                 mother_ids;
-      vector<HepMC::GenVertex*>   prods;
-
-      vertice = new HepMC::GenVertex(HepMC::FourVector(0,0,0,0),0);
-      evt->add_vertex(vertice);
-      if(!evt->signal_process_vertex()) evt->set_signal_process_vertex(vertice);
-
+/*
       const unsigned int knumpart = himain1.natt;
 
       for (unsigned int ipart = 0; ipart<knumpart; ipart++) {
@@ -226,6 +241,7 @@ bool JewelHadronizer::get_particles(HepMC::GenEvent *evt )
       for (unsigned int i = 0; i<prods.size(); i++) {
          if(prods[i]) delete prods[i];
       }
+*/
 
    return true;
 }
@@ -234,9 +250,10 @@ bool JewelHadronizer::get_particles(HepMC::GenEvent *evt )
 bool JewelHadronizer::call_hijset(double efrm, std::string frame, std::string proj, std::string targ, int iap, int izp, int iat, int izt)
 {
 
-   float ef = efrm;
+//   float ef = efrm;
   // initialize hydjet  
 //   HIJSET(ef,frame.data(),proj.data(),targ.data(),iap,izp,iat,izt,strlen(frame.data()),strlen(proj.data()),strlen(targ.data()));
+   INIT();
    return true;
 }
 
