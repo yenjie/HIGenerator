@@ -1,7 +1,7 @@
 all: jewel-2.0.1-vac jewel-2.0.1-simple
 
 # path to LHAPDF library
-LHAPDF_PATH := /home/lhapdf/install/lib/
+LHAPDF_PATH := /data/yjlee/HIGenerator/jewel/local/lib
 
 FC := gfortran
 FFLAGS := -g -static
