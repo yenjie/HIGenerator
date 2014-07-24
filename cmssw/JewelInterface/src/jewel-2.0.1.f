@@ -285,8 +285,7 @@ C--default settings
 	collider = 'PPJJ'
 	sqrts = 2760
 	pdfset = 10042
-C	nset = 1
-C	nset = 0
+	nset = 0
 	mass = 208.
 	weighted = .true.
 	weightex = 5.
