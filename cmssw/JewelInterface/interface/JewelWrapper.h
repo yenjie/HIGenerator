@@ -8,15 +8,16 @@
 #define _MAXNUMPARTICLE_ 130000
 
 extern "C" {
-  void hijset_(float& efrm, const char* frame, const char* proj, const char* targ, int& iap, int& izp, int& iat, int& izt, int, int, int); 
+  void init_();
 }
-#define HIJSET hijset_
+#define INIT init_
 
 extern "C" {
-  void hijing_(const char* frame, float& bmin0, float& bmax0, int);
+  void genevent_(int j);
 }
-#define HIJING hijing_
+#define GENEVENT genevent_
 
+/*
 extern "C" {
   extern struct{ 
     int natt;
@@ -31,6 +32,8 @@ extern "C" {
   }himain1_;
 }
 #define himain1 himain1_
+*/
+
 
 extern "C" {
   extern struct{ 
@@ -50,6 +53,7 @@ extern "C" {
   }hiparnt_;
 }
 #define hiparnt hiparnt_
+
 
 
 
