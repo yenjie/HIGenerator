@@ -285,7 +285,8 @@ C--default settings
 	collider = 'PPJJ'
 	sqrts = 2760
 	pdfset = 10042
-	nset = 1
+C	nset = 1
+C	nset = 0
 	mass = 208.
 	weighted = .true.
 	weightex = 5.
@@ -304,7 +305,8 @@ C--default settings
 	ptfac=1.
 	ftfac=1.d0
 
-	if (iargc().eq.0) then
+C	if (iargc().eq.0) then
+	if (1.eq.1) then
 	  write(*,*)'No parameter file given, '// 
      &'will run with default settings.'
 	else
@@ -1062,16 +1064,17 @@ C--develop parton shower
 	 ELSE 
 	  CALL CONVERTTOHEPMC(HPMCFID,NGOOD,PID)
 	 ENDIF
+	 
 
 C--write message to log-file
  102  IF(NSIM.GT.100)THEN
        IF(MOD(J,NSIM/100).EQ.0)THEN
- 	  write(logfid,*) 'done with event number ',J
+C 	  write(logfid,*) 'done with event number ',J
  	 ENDIF
 	else
- 	  write(logfid,*) 'done with event number ',J
+C 	  write(logfid,*) 'done with event number ',J
       ENDIF
-	call flush(logfid)
+C	call flush(logfid)
 	end
 
 
