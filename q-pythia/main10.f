@@ -89,7 +89,7 @@ c     LHA for jet definition
       parj(71)=3.d0
 c     QCD jets, large pt demanded
       MSEL=1
-      CKIN(3)=10.d0
+      CKIN(3)=80.d0
 c     
 c     DW tune, hep-ph/0610012
       MSTP(51)=7 ! CTEQ5L

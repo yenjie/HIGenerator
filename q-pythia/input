@@ -5,4 +5,4 @@
 '00-05'	! centrality class (for hydro)
 2	! 1: particle prod from center, 2: nuclear overlap
 1	! 0: formation time = 0; 1: as 2*omega/kt**2
-10	! Number of events
+1000	! Number of events
