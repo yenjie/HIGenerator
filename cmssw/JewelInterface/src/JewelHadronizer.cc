@@ -125,49 +125,15 @@ HepMC::GenParticle* JewelHadronizer::build_hijing(int index, int barcode)
 //___________________________________________________________________     
 HepMC::GenVertex* JewelHadronizer::build_hijing_vertex(int i,int id)
 {
-/*
-  // build verteces for the hijing stored events                        
-   double x0=himain2.vatt[0][i];
-   double y0=himain2.vatt[1][i];
-   double x = x0*cosphi0_-y0*sinphi0_;
-   double y = y0*cosphi0_+x0*sinphi0_;
-   double z=himain2.vatt[2][i];
-   double t=himain2.vatt[3][i];
-
-   HepMC::GenVertex* vertex = new HepMC::GenVertex(HepMC::FourVector(x,y,z,t),id);
-   return vertex;
-   */
    return 0;
 }
 
 bool JewelHadronizer::generatePartonsAndHadronize()
 {
-/*
-   // generate single event
-   if(rotate_) rotateEvtPlane();
-
-   // generate a HIJING event
-   
-   float f_bmin = bmin_;
-   float f_bmax = bmax_;
-   HIJING(frame_.data(), f_bmin, f_bmax, strlen(frame_.data()));
-
-   // event information
-   HepMC::GenEvent *evt = new HepMC::GenEvent();
-   get_particles(evt); 
-
-   //   evt->set_signal_process_id(pypars.msti[0]);      // type of the process
-   //   evt->set_event_scale(pypars.pari[16]);           // Q^2
-   add_heavy_ion_rec(evt);
-
-   event().reset(evt);
-*/
    // generate a JEWEL event
    static int j=0;
    j++;
    GENEVENT(j);
-   cout <<"Sounds good"<<endl;
-
    call_pyhepc(1);
    
    HepMC::GenEvent* evt = hepevtio.read_next_event();
@@ -178,82 +144,19 @@ bool JewelHadronizer::generatePartonsAndHadronize()
    //if(embedding_) rotateEvtPlane(evt,evtPlane_);
    //add_heavy_ion_rec(evt);
    event().reset(evt);
-
-   cout <<"Alive"<<endl;
-
-
    return true;
 }
 
 //_____________________________________________________________________  
 bool JewelHadronizer::get_particles(HepMC::GenEvent *evt )
 {      
-
-/*
-      const unsigned int knumpart = himain1.natt;
-
-      for (unsigned int ipart = 0; ipart<knumpart; ipart++) {
-	
-	int mid = himain2.katt[2][ipart] - 1;  // careful of fortan to c++ array index
-
-	particles.push_back(build_hijing(ipart,ipart+1));
-	prods.push_back(build_hijing_vertex(ipart,0));
-	mother_ids.push_back(mid);
-	LogDebug("DecayChain")<<"Mother index : "<<mid;
-      }	
-      
-      LogDebug("Jewel")<<"Number of particles in vector "<<particles.size();
-
-      for (unsigned int ipart = 0; ipart<particles.size(); ipart++) {
-	 HepMC::GenParticle* part = particles[ipart];
-
-         int mid = mother_ids[ipart];
-	 LogDebug("DecayChain")<<"Particle "<<ipart;
-	 LogDebug("DecayChain")<<"Mother's ID "<<mid;
-	 LogDebug("DecayChain")<<"Particle's PDG ID "<<part->pdg_id();
-	 
-	 // remove zero pT particles from list, protection for fastJet against pt=0 jets
-	 if(part->status()==1&&sqrt(part->momentum().px()*part->momentum().px()+part->momentum().py()*part->momentum().py())==0) 
-	   continue;
-	 
-         if(mid <= 0){
-	   vertice->add_particle_out(part);
-            continue;
-         }
-
-         if(mid > 0){
-	    HepMC::GenParticle* mother = particles[mid];
-	    LogDebug("DecayChain")<<"Mother's PDG ID "<<mother->pdg_id();
-	    HepMC::GenVertex* prod_vertex = mother->end_vertex();
-            if(!prod_vertex){
-               prod_vertex = prods[ipart];
-	       prod_vertex->add_particle_in(mother);
-	       
-               evt->add_vertex(prod_vertex);
-               prods[ipart]=0; // mark to protect deletion                                                                                                   
-	       
-            }
-            prod_vertex->add_particle_out(part);
-         }
-      }
-
-      // cleanup vertices not assigned to evt                                                                                                            
-      for (unsigned int i = 0; i<prods.size(); i++) {
-         if(prods[i]) delete prods[i];
-      }
-*/
-
-   return true;
 }
 
 //_____________________________________________________________________
 bool JewelHadronizer::call_hijset(double efrm, std::string frame, std::string proj, std::string targ, int iap, int izp, int iat, int izt)
 {
-
-//   float ef = efrm;
-  // initialize hydjet  
-//   HIJSET(ef,frame.data(),proj.data(),targ.data(),iap,izp,iat,izt,strlen(frame.data()),strlen(proj.data()),strlen(targ.data()));
    INIT();
+      
    return true;
 }
 
@@ -262,14 +165,14 @@ bool JewelHadronizer::initializeForInternalPartons(){
 
   //initialize pythia5
 
-  if(0){
-    std::string dumstr = "";
-    call_pygive(dumstr);
-  }
+//  if(0){
+//    std::string dumstr = "";
+//    call_pygive(dumstr);
+//  }
 
    // initialize hijing
-   LogInfo("HIJINGinAction") << "##### Calling HIJSET(" << efrm_ << "," <<frame_<<","<<proj_<<","<<targ_<<","<<iap_<<","<<izp_<<","<<iat_<<","<<izt_<<") ####";
-   call_hijset(efrm_,frame_,proj_,targ_,iap_,izp_,iat_,izt_);
+//   LogInfo("HIJINGinAction") << "##### Calling HIJSET(" << efrm_ << "," <<frame_<<","<<proj_<<","<<targ_<<","<<iap_<<","<<izp_<<","<<iat_<<","<<izt_<<") ####";
+//   call_hijset(efrm_,frame_,proj_,targ_,iap_,izp_,iat_,izt_);
 
    return true;
 
