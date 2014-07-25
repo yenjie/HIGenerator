@@ -279,8 +279,9 @@ C--default settings
 	nf = 3
 	lqcd = 0.4
 	q0 = 1.5
-	ptmin = 5.
-	ptmax = 350.
+C	ptmin = 5.
+	ptmin = 80.
+	ptmax = 1000.
 	etamax = 3.1
 	collider = 'PPJJ'
 	sqrts = 2760
