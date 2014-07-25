@@ -46,8 +46,6 @@ namespace gen
   private:
     
     void					add_heavy_ion_rec(HepMC::GenEvent *evt);
-    HepMC::GenParticle*	                        build_hijing( int index, int barcode );	
-    HepMC::GenVertex*                           build_hijing_vertex(int i, int id);
     bool					get_particles(HepMC::GenEvent* evt);
     bool                                        call_hijset(double efrm, std::string frame, std::string proj, 
                                                             std::string targ, int iap, int izp, int iat, int izt);
