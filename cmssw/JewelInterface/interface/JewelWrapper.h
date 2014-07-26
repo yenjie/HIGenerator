@@ -2,10 +2,15 @@
 #define GeneratorInterface_JewelInterface_JewelWrapper
 
 /*
- * Wrapper for FORTRAN version of HIJING 
+ * Wrapper for FORTRAN version of JEWEL
  */
 
 #define _MAXNUMPARTICLE_ 130000
+
+extern "C" {
+  double getcentrality_();
+}
+#define GETCENTRALITY getcentrality_
 
 extern "C" {
   void init_();

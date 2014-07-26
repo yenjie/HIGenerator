@@ -109,7 +109,7 @@ C--default settings
       TC=0.17d0
       WOODSSAXON=.TRUE.
       CENTRMIN=0.d0
-      CENTRMAX=10.d0
+      CENTRMAX=100.d0
       NF=3
       A=208
       N0=0.17d0

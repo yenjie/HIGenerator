@@ -7,7 +7,7 @@ process.load("Configuration.StandardSequences.Services_cff")
 process.load("GeneratorInterface.HydjetInterface.hydjetDefault_cfi")
 process.load('Configuration.StandardSequences.Generator_cff')
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000)
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100000)
                                        )
 
 process.source = cms.Source("EmptySource")

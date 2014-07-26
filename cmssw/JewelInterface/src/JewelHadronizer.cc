@@ -68,25 +68,28 @@ JewelHadronizer::~JewelHadronizer()
 //_____________________________________________________________________
 void JewelHadronizer::add_heavy_ion_rec(HepMC::GenEvent *evt)
 {
-  // heavy ion record in the final CMSSW Event
-  // Yen-Jie: set to 0 for the moment
-  HepMC::HeavyIon* hi = new HepMC::HeavyIon(
-    0,                               // Ncoll_hard/N of SubEvents
-    0,                               // Npart_proj
-    0,                               // Npart_targ
-    0,                               // Ncoll
+ // heavy ion record in the final CMSSW Event
+ // Yen-Jie: set to 0 for the moment
+ // Yen-Jie: need to fix impact para 
+ double centr= GETCENTRALITY();
+ HepMC::HeavyIon* hi = new HepMC::HeavyIon(
+    1,                               // Ncoll_hard/N of SubEvents
+    1,                               // Npart_proj
+    1,                               // Npart_targ
+    1,                               // Ncoll
     0,                               // spectator_neutrons
-    0,                               // spectator_protons
-    0,                               // N_Nwounded_collisions
-    0,                               // Nwounded_N_collisions
-    0,                               // Nwounded_Nwounded_collisions
+    1,                               // spectator_protons
+    1,                               // N_Nwounded_collisions
+    1,                               // Nwounded_N_collisions
+    1,                               // Nwounded_Nwounded_collisions
                                      //gsfs Changed from 19 to 18 (Fortran counts from 1 , not 0) 
-    0,                               // impact_parameter in [fm]
+    centr,                               // impact_parameter in [fm]
     0,                               // event_plane_angle
     0,                               // eccentricity
                                      //gsfs Changed from 12 to 11 (Fortran counts from 1 , not 0) 
     0                                // sigma_inel_NN
   );
+  
   evt->set_heavy_ion(*hi);
   delete hi;
 }
@@ -100,7 +103,7 @@ bool JewelHadronizer::generatePartonsAndHadronize()
    cout <<pysubs_.ckin[2]<<endl;
    call_pyhepc(1);   
    HepMC::GenEvent* evt = hepevtio.read_next_event();
-
+   add_heavy_ion_rec(evt);
    evt->set_signal_process_id(pypars.msti[0]);	 // type of the process
    evt->set_event_scale(pypars.pari[16]);  	 // Q^2
 
