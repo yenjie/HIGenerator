@@ -93,12 +93,13 @@ void YajemHadronizer::add_heavy_ion_rec(HepMC::GenEvent *evt)
 
 bool YajemHadronizer::generatePartonsAndHadronize()
 {
-   // generate a JEWEL event
+   // generate a Yajem event
    static int j=0;
    j++;
    GENEVENT(j);
-   cout <<pysubs_.ckin[2]<<endl;
+   cout <<pydat1_.parj[84]<<endl;
    call_pyhepc(1);   
+   cout <<pyjets_.k[1][2]<<endl;
    cout <<"I am alive"<<endl;
    HepMC::GenEvent* evt = hepevtio.read_next_event();
 

@@ -1,5 +1,35 @@
 C*********************************************************************
  
+      program yajem_run
+C...Double precision and integer declarations.
+      IMPLICIT DOUBLE PRECISION(A-H, O-Z)
+      IMPLICIT INTEGER(I-N)
+      INTEGER PYK,PYCHGE,PYCOMP
+
+      character*4 reffram 
+
+C...Commonblocks.
+      COMMON/PYJETS/N,NPAD,K(40000,5),P(40000,5),V(40000,5)
+      COMMON/PYDAT1/MSTU(200),PARU(200),MSTJ(200),PARJ(200)
+      COMMON/PYDAT2/KCHG(500,4),PMAS(500,4),PARF(2000),VCKM(4,4)
+      COMMON/PYDAT3/MDCY(500,3),MDME(4000,2),BRAT(4000),KFDP(4000,5)
+      COMMON/PYSUBS/MSEL,MSELPD,MSUB(500),KFIN(2,-40:40),CKIN(200)
+      COMMON/PYPARS/MSTP(200),PARP(200),MSTI(200),PARI(200)
+      COMMON/PYINT1/MINT(400),VINT(400)
+      COMMON/PYDATR/MRPY(6),RRPY(100)
+      COMMON/YADAT/YAPROFILET(500),YAPROFILEQ(500),YAPROFILEINT(500)
+      COMMON/YADAT1/YAPARS(20),YAFLAGS(20)
+      SAVE /PYJETS/,/PYDAT1/,/PYDAT2/,/PYDAT3/,/PYSUBS/,/PYPARS/,
+     &     /PYINT1/,/YADAT/,/YADAT1/
+C...Local arrays.
+      DIMENSION PSUM(5),PINI(6),PFIN(6)
+
+c conversion from mm to fm/c
+      DOUBLE PRECISION mm_to_fmc
+      mm_to_fmc=1d3/(1d-15/2.99792458d8)
+
+      END
+
       subroutine init()
  
 C...Double precision and integer declarations.
@@ -80,7 +110,7 @@ c... define back-to-back parton pair
 c... the random number generator seed
 	MRPY(1)=11035493
 
-
+        write (*,*) "Getting initialization"
 c set number of events
       nevent=100000
 
@@ -188,11 +218,15 @@ C      RETURN
 
 
       SUBROUTINE genevent()
+C...Double precision and integer declarations.
       IMPLICIT DOUBLE PRECISION(A-H, O-Z)
       IMPLICIT INTEGER(I-N)
+      INTEGER PYK,PYCHGE,PYCOMP
+
+      character*4 reffram 
 
 C...Commonblocks.
-      COMMON/PYJETS/N,NPAD,K(4000,5),P(4000,5),V(4000,5)
+      COMMON/PYJETS/N,NPAD,K(40000,5),P(40000,5),V(40000,5)
       COMMON/PYDAT1/MSTU(200),PARU(200),MSTJ(200),PARJ(200)
       COMMON/PYDAT2/KCHG(500,4),PMAS(500,4),PARF(2000),VCKM(4,4)
       COMMON/PYDAT3/MDCY(500,3),MDME(4000,2),BRAT(4000),KFDP(4000,5)
@@ -204,14 +238,78 @@ C...Commonblocks.
       COMMON/YADAT1/YAPARS(20),YAFLAGS(20)
       SAVE /PYJETS/,/PYDAT1/,/PYDAT2/,/PYDAT3/,/PYSUBS/,/PYPARS/,
      &     /PYINT1/,/YADAT/,/YADAT1/
+C...Local arrays.
+      DIMENSION PSUM(5),PINI(6),PFIN(6)
 
+c conversion from mm to fm/c
+      DOUBLE PRECISION mm_to_fmc
+      mm_to_fmc=1d3/(1d-15/2.99792458d8)
+
+      
+C...Standard PYTHIA flags influencing how the shower is done - can usually be left at their defaults
+C...but some are worth setting if photon production or a different fragmentation model is needed
+
+
+c       MSTJ(1)=2 ! 1: Lund 2: independent fragmentation
+c       MSTJ(2)=1 ! 1: fragments like q 3: fragments like qqbar pair      
+c       MSTJ(3)=2 ! conservation laws to be imposed
+c       MSTJ(21)=0 ! 0: no particle decays 2: default
+c	MSTJ(22)=2 ! decay particles only when average lifetime is shorter than PARJ(71)
+c	PARJ(71)=0.1 ! decay length in mm
+       MSTJ(41)=1 ! 1: QCD branchings 2: QCD + QED branchings 10: QED branchings enhanced by PARJ(84)
+c       MSTJ(42)=1 ! 1: no angular coherence, 2: coherence 3: coherence with mass effect
+c       MSTJ(44)=0 ! 0: fixed 2: run alpha_s in shower     	
+c	PARU(111)=0.3 ! fixed alpha s
+	PARJ(84)=10.0 ! enhancement for e.m. emissions
+c	PARJ(81)=0.2 ! Lambda
+
+
+C... MSTJ(43) needs to be 3 for YaJEM to properly work, do not change!
+       MSTJ(43)=3 ! z definition 1: lc 2: lu 3: gc 4: gu 
+
+C... PARJ(82) is the crucial parameter for YaJEM-D functionality - the min Q^2 scale must be set to 
+C... sqrt(E/L) once parton energy E and medium length L are known
+
+	PARJ(82)=1.0D0 ! min Q for branching
+
+
+c	YaJEM-specific parameters and flags
+	YAPARS(1)=0.0D0 ! f_med parameter enhancing branching kernels
+	YAPARS(2)=3.0D0 ! Delta Q^2 integrated along parton path, i.e. normalization of profile.dat 
+	YAPARS(3)=0.8D0 ! coefficient linking YAPARS(2) and induced radiation
+	YAPARS(4)=0.1D0 ! coefficient linking YAPARS(2) and drag force
+
+	YAPARS(10)=0.5D0 ! for use with YAFLAGS(3)=1, max. medium temperature corresponding to initial value in profile.dat
+
+	YAFLAGS(1)=0 ! additional debug info on/off (0)
+	YAFLAGS(2)=1 ! probabilistic parton formation time on/off (1)
+	YAFLAGS(3)=0 ! jet-photon conversion model on/off (0) !Experimental!
+
+
+c... define back-to-back parton pair
+
+	ip=-1
+	kf1=1
+	kf2=-1  
+	pecm=2760.0D0
+
+c... the random number generator seed
+	MRPY(1)=11035493
+
+        write (*,*) "Getting initialization"
+c set number of events
+      nevent=100000
 
 c run in back-to-back jet pair mode
+        write(*,*) ip,kf1,kf2,pecm
 	call py2ent(ip,kf1,kf2,pecm)
 	call pyshow(1,2, pecm/2.0D0)
 	call pyexec
+	
+	write(*,*) "produce"
 
-	call pyedit(1) !1: final state only 5: fragmenting partons + final state
+C	call pyedit(1) !1: final state only 5: fragmenting partons + final state
+	call pyedit(5) !1: final state only 5: fragmenting partons + final state
 
 
 

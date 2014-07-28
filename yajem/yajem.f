@@ -81,7 +81,7 @@ c... the random number generator seed
 
 
 c set number of events
-      nevent=100000
+      nevent=10
 
 
 C...The matter profile to be evaluated is loaded here. The file just needs to contain the shape of qhat(xi)
