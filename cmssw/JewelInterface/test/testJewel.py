@@ -11,6 +11,8 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000)
 
 process.source = cms.Source("EmptySource")
 
+process.load("Configuration.Generator.PythiaUESettings_cfi");
+
 process.generator = cms.EDFilter("JewelGeneratorFilter",
                                      frame = cms.string('CMS     '),
                                      targ = cms.string('P       '),
@@ -18,11 +20,20 @@ process.generator = cms.EDFilter("JewelGeneratorFilter",
                                      bMin = cms.double(0),
                                      izt = cms.int32(1),
                                      proj = cms.string('A       '),
-                                     comEnergy = cms.double(5020.0),
+                                     comEnergy = cms.double(2760.0),
                                      iat = cms.int32(1),
                                      bMax = cms.double(15),
                                      iap = cms.int32(208),
-                                     rotateEventPlane = cms.bool(True)
+                                     rotateEventPlane = cms.bool(True),
+    		                     PythiaParameters = cms.PSet(   
+                                        process.pythiaUESettingsBlock,
+                                        processParameters = cms.vstring('MSEL=1               ! QCD hight pT processes',
+                                                                        'CKIN(3)=80.          ! minimum pt hat for hard interactions', 
+                                                                        'CKIN(4)=9990.         ! maximum pt hat for hard interactions'),
+                                                                        # This is a vector of ParameterSet names to be read, in this order  
+                                        parameterSets = cms.vstring('pythiaUESettings', 
+                                        'processParameters')
+                                     )
                                  )
 
 

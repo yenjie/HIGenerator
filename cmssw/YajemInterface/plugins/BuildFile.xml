@@ -1,4 +1,4 @@
-<use   name="GeneratorInterface/JewelInterface"/>
-<library   file="*.cc" name="GeneratorInterfaceJewelInterfacePlugins">
+<use   name="GeneratorInterface/YajemInterface"/>
+<library   file="*.cc" name="GeneratorInterfaceYajemInterfacePlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>

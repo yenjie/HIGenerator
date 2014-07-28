@@ -99,12 +99,15 @@ bool YajemHadronizer::generatePartonsAndHadronize()
    GENEVENT(j);
    cout <<pysubs_.ckin[2]<<endl;
    call_pyhepc(1);   
+   cout <<"I am alive"<<endl;
    HepMC::GenEvent* evt = hepevtio.read_next_event();
 
    evt->set_signal_process_id(pypars.msti[0]);	 // type of the process
    evt->set_event_scale(pypars.pari[16]);  	 // Q^2
+   cout <<"Keeping up"<<endl;
 
    event().reset(evt);
+   cout <<"Made it!"<<endl;   
    return true;
 }
 

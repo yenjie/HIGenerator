@@ -1,34 +1,7 @@
 C*********************************************************************
  
-      program yajem_run
-C... Start of the event loop
-
-      call init()
-C...Generate nevent events of each required type.
-      DO 220 IEVT=1,nevent
-         call generateEvent()
- 220  CONTINUE
-
-
-
- 2000    FORMAT('OSC1997A'/'final_id_p_x')
- 2100    FORMAT(' YaJEM  ',5X,F5.3,2X,'(',I3,',',I6,')+(',I3,',',I6,')',
-     &        2X,A4,2X,D10.4,2X,I8)
- 2200    FORMAT('!'/'! Listing of ',I6,' collision events:'/'!')
- 2300    FORMAT(I10,2X,I10,2X,F8.3,2X,F8.3)
- 2400 FORMAT(I10,2X,I10,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,
-     &D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6)
-csab, oscar modifications
-c 2400    FORMAT(I10,2X,I10,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,
-c     &        D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6)
-
- 3000	FORMAT(D12.6,2X,D12.6) 
- 3001	FORMAT(I10)
- 3002	FORMAT(D12.6,2X,D12.6,2X,D12.6) 
-      RETURN
-      END
+      subroutine init()
  
-      integer function init() 
 C...Double precision and integer declarations.
       IMPLICIT DOUBLE PRECISION(A-H, O-Z)
       IMPLICIT INTEGER(I-N)
@@ -37,7 +10,7 @@ C...Double precision and integer declarations.
       character*4 reffram 
 
 C...Commonblocks.
-      COMMON/PYJETS/N,NPAD,K(4000,5),P(4000,5),V(4000,5)
+      COMMON/PYJETS/N,NPAD,K(40000,5),P(40000,5),V(40000,5)
       COMMON/PYDAT1/MSTU(200),PARU(200),MSTJ(200),PARJ(200)
       COMMON/PYDAT2/KCHG(500,4),PMAS(500,4),PARF(2000),VCKM(4,4)
       COMMON/PYDAT3/MDCY(500,3),MDME(4000,2),BRAT(4000),KFDP(4000,5)
@@ -53,6 +26,7 @@ C...Local arrays.
       DIMENSION PSUM(5),PINI(6),PFIN(6)
 
 c conversion from mm to fm/c
+      DOUBLE PRECISION mm_to_fmc
       mm_to_fmc=1d3/(1d-15/2.99792458d8)
 
       
@@ -131,10 +105,92 @@ C...The arrays may also be set by other means if desired by the user
 		YAPROFILEINT(IPRO) = QSUM
 	END DO
 	
-        end
 
 
-        integer function generateEvent()
+C... Start of the event loop
+
+C...Generate nevent events of each required type.
+C      DO 220 IEVT=1,nevent
+C      call genevent()
+
+C...standardized output written to YaJEM_OSC.DAT, according to the
+C...OSCAR (Open Standard Codes At RHIC) conventions, RIKEN-BNL, 1997.
+C         IF(IEVT.EQ.1) THEN
+C	    VERS=1.0D0
+C            IBM1=-1
+C            IBM2=mint(11)
+C            ITG1=-1
+C            ITG2=mint(12)
+c            
+C            OPEN(30,FILE='YaJEM_OSC.dat',STATUS='UNKNOWN')
+C            WRITE(30,2000)
+c            WRITE(30,2100) VERS,IBM1,IBM2,ITG1,ITG2,reffram,
+C     &           pesum,0
+Ccsab, oscar modifications
+C
+C         ENDIF
+C
+C
+c	
+
+C... write the event only if a high p_T hadron was observed, this allows to store only triggered events
+C... with an evaluation of the trigger condition early on
+	
+
+
+C	IF(p_T_max.gt.0.0D0) THEN
+Cc		
+C
+c         WRITE(30,2300) IEVT,N,bimp,0d0C
+c
+C         WRITE(30,2400) (I,K(I,2),(P(I,J),J=1,5),(V(I,J),
+C     &        J=1,4),I=1,N)
+C
+C
+C	ENDIF
+
+C         IF(IEVT.EQ.nevent) CLOSE(30)
+
+
+
+C 220  CONTINUE
+
+
+
+C 2000    FORMAT('OSC1997A'/'final_id_p_x')
+C 2100    FORMAT(' YaJEM  ',5X,F5.3,2X,'(',I3,',',I6,')+(',I3,',',I6,')',
+c     &        2X,A4,2X,D10.4,2X,I8)
+C 2200    FORMAT('!'/'! Listing of ',I6,' collision events:'/'!')
+C 2300    FORMAT(I10,2X,I10,2X,F8.3,2X,F8.3)
+C 2400 FORMAT(I10,2X,I10,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,
+C     &D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6)
+Ccsab, oscar modifications
+Cc 2400    FORMAT(I10,2X,I10,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,
+Cc     &        D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6,2X,D12.6)
+
+C 3000	FORMAT(D12.6,2X,D12.6) 
+C 3001	FORMAT(I10)
+C 3002	FORMAT(D12.6,2X,D12.6,2X,D12.6) 
+C      RETURN
+      END subroutine
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+      SUBROUTINE genevent()
+      IMPLICIT DOUBLE PRECISION(A-H, O-Z)
+      IMPLICIT INTEGER(I-N)
+
 C...Commonblocks.
       COMMON/PYJETS/N,NPAD,K(4000,5),P(4000,5),V(4000,5)
       COMMON/PYDAT1/MSTU(200),PARU(200),MSTJ(200),PARJ(200)
@@ -148,15 +204,9 @@ C...Commonblocks.
       COMMON/YADAT1/YAPARS(20),YAFLAGS(20)
       SAVE /PYJETS/,/PYDAT1/,/PYDAT2/,/PYDAT3/,/PYSUBS/,/PYPARS/,
      &     /PYINT1/,/YADAT/,/YADAT1/
-C...Local arrays.
-        
+
+
 c run in back-to-back jet pair mode
-
-	ip=-1
-	kf1=1
-	kf2=-1  
-	pecm=40.0D0
-
 	call py2ent(ip,kf1,kf2,pecm)
 	call pyshow(1,2, pecm/2.0D0)
 	call pyexec
@@ -189,7 +239,10 @@ C...go through the event and find the highest p_T hadron
 
 
 c... this is a condition for charged hadron production, only high P_T tracks are condidered
-	IF((K(iparticle,2).EQ.211).OR.(K(iparticle,2).eq.-211).OR.(K(iparticle,2).eq.321).OR.(K(iparticle,2).eq.-321).OR.(K(iparticle,2).eq.2212).OR.(K(iparticle,2).eq.-2212)) THEN
+	IF((K(iparticle,2).EQ.211).OR.(K(iparticle,2).eq.-211)
+     &	.OR.(K(iparticle,2).eq.321)
+     &	.OR.(K(iparticle,2).eq.-321).OR.(K(iparticle,2).eq.2212)
+     &  .OR.(K(iparticle,2).eq.-2212)) THEN
 
 
 	 IF(p_T.gt.p_T_max) THEN
@@ -207,7 +260,10 @@ C... go through the event and find the NL fragmentation hadron
 	DO iparticle = 1, nparticles
 
 	p_T=P(iparticle,3)
-	IF((K(iparticle,2).EQ.211).OR.(K(iparticle,2).eq.-211).OR.(K(iparticle,2).eq.321).OR.(K(iparticle,2).eq.-321).OR.(K(iparticle,2).eq.2212).OR.(K(iparticle,2).eq.-2212)) THEN
+	IF((K(iparticle,2).EQ.211).OR.(K(iparticle,2).eq.-211)
+     &	.OR.(K(iparticle,2).eq.321)
+     &	.OR.(K(iparticle,2).eq.-321).OR.(K(iparticle,2).eq.2212)
+     &  .OR.(K(iparticle,2).eq.-2212)) THEN
 	IF((p_T.gt.p_T_second).AND.(p_T.lt.p_T_max)) THEN
 		p_T_second=p_T
 
@@ -219,44 +275,5 @@ C... go through the event and find the NL fragmentation hadron
 
 
 
-
-C...standardized output written to YaJEM_OSC.DAT, according to the
-C...OSCAR (Open Standard Codes At RHIC) conventions, RIKEN-BNL, 1997.
-         IF(IEVT.EQ.1) THEN
-	    VERS=1.0D0
-            IBM1=-1
-            IBM2=mint(11)
-            ITG1=-1
-            ITG2=mint(12)
-            
-            OPEN(30,FILE='YaJEM_OSC.dat',STATUS='UNKNOWN')
-            WRITE(30,2000)
-            WRITE(30,2100) VERS,IBM1,IBM2,ITG1,ITG2,reffram,
-     &           pesum,0
-csab, oscar modifications
-
-         ENDIF
-
-
-	
-
-C... write the event only if a high p_T hadron was observed, this allows to store only triggered events
-C... with an evaluation of the trigger condition early on
-	
-
-
-	IF(p_T_max.gt.0.0D0) THEN
-c		
-
-         WRITE(30,2300) IEVT,N,bimp,0d0
-
-         WRITE(30,2400) (I,K(I,2),(P(I,J),J=1,5),(V(I,J),
-     &        J=1,4),I=1,N)
-
-
-	ENDIF
-
-         IF(IEVT.EQ.nevent) CLOSE(30)
-
  
-         end
+        END SUBROUTINE

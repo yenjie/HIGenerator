@@ -1,6 +1,6 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "GeneratorInterface/JewelInterface/interface/JewelGeneratorFilter.h"
+#include "GeneratorInterface/YajemInterface/interface/YajemGeneratorFilter.h"
 
-using gen::JewelGeneratorFilter;
+using gen::YajemGeneratorFilter;
 
-DEFINE_FWK_MODULE(JewelGeneratorFilter);
+DEFINE_FWK_MODULE(YajemGeneratorFilter);
