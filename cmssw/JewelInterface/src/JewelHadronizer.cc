@@ -11,6 +11,7 @@
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "GeneratorInterface/Core/interface/RNDMEngineAccess.h"
+#include "GeneratorInterface/Pythia6Interface/interface/Pythia6Service.h"
 
 #include "GeneratorInterface/JewelInterface/interface/JewelHadronizer.h"
 #include "GeneratorInterface/JewelInterface/interface/JewelPythiaWrapper.h"
@@ -50,11 +51,13 @@ JewelHadronizer::JewelHadronizer(const ParameterSet &pset) :
     phi0_(0.),
     sinphi0_(0.),
     cosphi0_(1.),
-    rotate_(pset.getParameter<bool>("rotateEventPlane"))
+    rotate_(pset.getParameter<bool>("rotateEventPlane")),
+    pythia6Service_(new Pythia6Service(pset))
 {
   // Default constructor
   Service<RandomNumberGenerator> rng;
   hijRandomEngine = &(rng->getEngine());
+
 
 }
 
@@ -63,6 +66,7 @@ JewelHadronizer::JewelHadronizer(const ParameterSet &pset) :
 JewelHadronizer::~JewelHadronizer()
 {
   // destructor
+  delete pythia6Service_;
 }
 
 //_____________________________________________________________________
@@ -96,6 +100,8 @@ void JewelHadronizer::add_heavy_ion_rec(HepMC::GenEvent *evt)
 
 bool JewelHadronizer::generatePartonsAndHadronize()
 {
+   Pythia6Service::InstanceWrapper guard(pythia6Service_);
+
    // generate a JEWEL event
    static int j=0;
    j++;
@@ -120,6 +126,9 @@ bool JewelHadronizer::get_particles(HepMC::GenEvent *evt )
 //_____________________________________________________________________
 bool JewelHadronizer::call_hijset(double efrm, std::string frame, std::string proj, std::string targ, int iap, int izp, int iat, int izt)
 {
+   Pythia6Service::InstanceWrapper guard(pythia6Service_);
+   pythia6Service_->setGeneralParams();
+   pythia6Service_->setCSAParams();
    INIT();
       
    return true;
@@ -128,6 +137,7 @@ bool JewelHadronizer::call_hijset(double efrm, std::string frame, std::string pr
 //______________________________________________________________
 bool JewelHadronizer::initializeForInternalPartons(){
    call_hijset(efrm_,frame_,proj_,targ_,iap_,izp_,iat_,izt_);
+
    return true;
 }
 

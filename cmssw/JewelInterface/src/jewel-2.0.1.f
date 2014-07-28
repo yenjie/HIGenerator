@@ -475,15 +475,15 @@ C--No hadronisation
 C--Min shat in simulation
        CKIN(1)=2.      
 C--pT-cut
-       CKIN(3)=PTMIN
-       CKIN(4)=PTMAX
+C       CKIN(3)=PTMIN
+C       CKIN(4)=PTMAX
 C--use LHAPDF
 	 MSTP(52)=2
 C--choose pdf: CTEQ6ll (LO fit/LO alphas) - 10042
 C	         MSTW2008 (LO central) - 21000
-	 MSTP(51)=PDFSET
+C	 MSTP(51)=PDFSET
 C--All QCD processes are active
-       MSEL=1
+C       MSEL=1
 C--weighted events
        IF(WEIGHTED) MSTP(142)=1
 

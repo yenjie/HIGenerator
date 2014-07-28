@@ -23,7 +23,7 @@ namespace gen
   extern "C" {
     float hijran_(int*);
   }
-
+  class Pythia6Service;
   class JewelHadronizer : public BaseHadronizer {
   public:
     JewelHadronizer(const edm::ParameterSet &);
@@ -80,7 +80,7 @@ namespace gen
     //    double            signn_;                 // inelastic nucleon nucleon cross section [mb]
                                               // DEFAULT= 58 mb
     //    CLHEP::HepRandomEngine* fRandomEngine;
-//    Pythia6Service* pythia6Service_;
+    Pythia6Service* pythia6Service_;
   };
 
 } /*end namespace*/
