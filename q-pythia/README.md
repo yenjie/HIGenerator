@@ -25,3 +25,13 @@ If you have any question, please don't hesitate to contact us.
 
 Best regards,
 Liliana and Nestor
+
+
+========
+In the meanwhile: in the paper, we used a 1 GeV cut for the input particles and the PQM model with the following parameters for <$\hat{q}$>:
+
+0 (0)
+14000 (1)
+28000 (2)
+56000 (4)
+112000 (8)
