@@ -41,14 +41,48 @@ process.SimpleMemoryCheck = cms.Service('SimpleMemoryCheck',
 process.ana = cms.EDAnalyzer('HydjetAnalyzer'
                              )
 
-process.dijet = cms.EDAnalyzer('DijetNtupleProducer')
 
 process.TFileService = cms.Service('TFileService',
                                    fileName = cms.string('PythiaZ2Star.root')
                                    )
 
 
-process.p1 = cms.Path(process.generator*process.hiGenParticles*process.hiGenJets*process.dijet*process.ana)
+process.dijet1 = cms.EDAnalyzer("DijetNtupleProducer",
+                               src3=cms.untracked.InputTag("ak1HiGenJets")
+                              )
+process.dijet2 = cms.EDAnalyzer("DijetNtupleProducer",
+                               src3=cms.untracked.InputTag("ak2HiGenJets")
+                              )
+process.dijet3 = cms.EDAnalyzer("DijetNtupleProducer",
+                               src3=cms.untracked.InputTag("ak3HiGenJets")
+                              )
+process.dijet4 = cms.EDAnalyzer("DijetNtupleProducer",
+                               src3=cms.untracked.InputTag("ak4HiGenJets")
+                              )
+process.dijet5 = cms.EDAnalyzer("DijetNtupleProducer",
+                               src3=cms.untracked.InputTag("ak5HiGenJets")
+                              )
+process.dijet6 = cms.EDAnalyzer("DijetNtupleProducer",
+                               src3=cms.untracked.InputTag("ak6HiGenJets")
+                              )
+process.dijet7 = cms.EDAnalyzer("DijetNtupleProducer",
+                               src3=cms.untracked.InputTag("ak7HiGenJets")
+                              )
+
+
+
+
+process.p1 = cms.Path(process.generator*
+                      process.hiGenParticles*
+		      process.hiGenJets*
+		      process.dijet1*
+		      process.dijet2*
+		      process.dijet3*
+		      process.dijet4*
+		      process.dijet5*
+		      process.dijet6*
+		      process.dijet7*
+		      process.ana)
 
 
 
