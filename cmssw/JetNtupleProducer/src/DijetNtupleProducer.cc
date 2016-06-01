@@ -74,6 +74,7 @@ Implementation:
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "SimDataFormats/Vertex/interface/SimVertex.h"
 #include "SimDataFormats/Vertex/interface/SimVertexContainer.h"
+#include "PhysicsTools/JetMCAlgos/interface/BasePartonSelector.h"
 
 #include <memory>
 #include <iostream>
@@ -118,8 +119,10 @@ struct etdr{
    float et;
    float dr;
 };
+
   struct JRAV{
     int index;
+    int parton;
     float jtpt;
     float jtrawpt;
     float refpt;
@@ -179,6 +182,7 @@ class DijetNtupleProducer : public edm::EDAnalyzer {
         virtual void beginJob() ;
         virtual void analyze(const edm::Event&, const edm::EventSetup&);
         virtual void endJob() ;
+		int fillAlgoritDefinition( const reco::Jet &, Handle <reco::GenParticleRefVector> );
 
         // ----------member data ---------------------------
 
@@ -200,6 +204,7 @@ class DijetNtupleProducer : public edm::EDAnalyzer {
    edm::InputTag jetTag3_;
    edm::InputTag jetTag5_;
    edm::InputTag eventInfoTag_;
+   edm::InputTag partonTag_;
 
    std::vector<JRAV> jraV;
    JRA current;
@@ -225,6 +230,7 @@ DijetNtupleProducer::DijetNtupleProducer(const edm::ParameterSet& iConfig)
    jetTag3_ = iConfig.getUntrackedParameter<edm::InputTag>("src3",edm::InputTag("ak3HiGenJets"));   
    jetTag5_ = iConfig.getUntrackedParameter<edm::InputTag>("src5",edm::InputTag("ak5HiGenJets"));
    eventInfoTag_ = iConfig.getUntrackedParameter<edm::InputTag>("eventInfoTag",edm::InputTag("generator"));
+   partonTag_ = iConfig.getUntrackedParameter<edm::InputTag>("partonsTag",edm::InputTag("myPartons"));
 }
 
 
@@ -266,7 +272,7 @@ DijetNtupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    pt1alt = -9, eta1alt = -9, phi1alt = -9, dphialt = -9,
       pt2alt = -9, eta2alt = -9, phi2alt = -9,
       pt3alt = -9, eta3alt = -9, phi3alt = -9, dphi3alt = -9;
-
+    int parton1 = -9, parton2 = -9;
 //   int isFrag = 0;
 
 
@@ -275,6 +281,9 @@ DijetNtupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    iEvent.getByLabel(jetTag3_,jets);
    jraV.clear();
    
+  Handle <reco::GenParticleRefVector> partons;
+  iEvent.getByLabel(partonTag_, partons );
+
   current.nref=jets->size();
   cout <<current.nref<<endl;
   std::cout<<"before jet loop"<<std::endl;
@@ -298,7 +307,17 @@ DijetNtupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       jv.area = jet.jetArea();
       jv.pu  = jet.pileup();
       jv.index = j;
+	  int partonIndex = fillAlgoritDefinition(jet, partons);
+	  int partonFlavor = -1;
 
+	  if(partonIndex>=0){	 
+	   const reco::Candidate & aParton = *(partons->at(partonIndex).get());
+	   partonFlavor = aParton.pdgId();
+	   //if(abs(partonFlavor)==5)cout<<"I am b-quark, status: "<< aParton.status()<<", index = "<<partonIndex<<endl;
+
+	  }
+
+      jv.parton = partonFlavor;
       jraV.push_back(jv);
    }
   std::cout<<"before filling the tree"<<std::endl;
@@ -311,6 +330,7 @@ DijetNtupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       pt1 = jet.pt();
       eta1 = jet.eta();
       phi1 = jet.phi();
+      parton1 = jraV[0].parton;
    }
 
    if(jraV.size() > 1){
@@ -318,6 +338,7 @@ DijetNtupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       pt2 = jet.pt();
       eta2 = jet.eta();
       phi2 = jet.phi();
+      parton2 = jraV[1].parton;
       dphi = deltaPhi(phi2,phi1);
    }
 
@@ -382,8 +403,8 @@ DijetNtupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    iEvent.getByLabel(eventInfoTag_,hEventInfo);
    float pthat = hEventInfo->qScale();
 
-   float entry[]={pt1,eta1,phi1,
-		  pt2,eta2,phi2,
+   float entry[]={pt1,eta1,phi1,(float)parton1,
+		  pt2,eta2,phi2,(float)parton2,
 		  pt3,eta3,phi3,
 		  dphi, dphi3,
 		  pt1alt,eta1alt,phi1alt,
@@ -396,6 +417,72 @@ DijetNtupleProducer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    nt->Fill(entry);
 
    
+}
+
+int DijetNtupleProducer::fillAlgoritDefinition( const reco::Jet & genJet, Handle <reco::GenParticleRefVector> partons ) {
+
+ int tempParticle = -1;
+ int tempPartonHighestPt = -1;
+ //int tempNearest = -1;
+ float maxPt = 0;
+ float minDr = 1000;
+ bool foundPriority = false;
+
+ // Loop over the partons in question until we find a priority
+ // "hit", or if we find none in the priority list (or we don't want
+ // to consider priority), then loop through all partons and fill
+ // standard definition.
+ 
+ //
+ // Matching:
+ //
+ // 1) First try to match by hand. The "priority list" is given
+ //    by the user. The algorithm finds any partons in that
+ //    "priority list" that are within the specified cone size.
+ //    If it finds one, it counts the object as associating to that
+ //    particle.
+ //    NOTE! The objects in the priority list are given in order
+ //    of priority. So if the user specifies:
+ //    6, 24, 21,
+ //    then it will first look for top quarks, then W bosons, then gluons.
+ // 2) If no priority items are found, do the default "standard"
+ //    matching.
+ for( size_t m = 0; m != partons->size() && !foundPriority; ++ m ) {
+   const reco::Candidate & aParton = *(partons->at(m).get());
+   
+   // Default behavior:
+   // Look for partons before the color string to associate.
+   // Do this if we don't want to do priority matching, or if
+   // we didn't find a priority object.
+   
+   if( !foundPriority && aParton.status() != 3 ) {
+     double dist = deltaR( genJet.p4(), aParton.p4() );
+     if( dist <= 0.3 ) {
+       if( dist < minDr ) {
+	 minDr = dist;
+	 //tempNearest = m;
+       }
+       if( tempParticle == -1 && ( abs( aParton.pdgId() ) == 4 )  ) tempParticle = m;
+       if(                         abs( aParton.pdgId() ) == 5    ) tempParticle = m;
+       if( aParton.pt() > maxPt ) {
+	 maxPt = aParton.pt();
+	 tempPartonHighestPt = m;
+       }
+         }
+      }
+    }
+ 
+    if ( foundPriority ) {
+      //theHeaviest = tempParticle; // The priority-matched particle
+      //theHardest  = -1;  //  set the rest to -1
+      //theNearest2 = -1;  // "                  "
+    } else {
+      //theHeaviest = tempParticle;
+      //theHardest  = tempPartonHighestPt;
+      //theNearest2 = tempNearest;
+      if ( tempParticle == -1 ) tempParticle = tempPartonHighestPt;
+    }
+   return tempParticle;
 }
 
 
@@ -412,7 +499,7 @@ DijetNtupleProducer::beginJob()
   
   
 
-   nt = fs->make<TNtuple>("nt","","pt1:eta1:phi1:pt2:eta2:phi2:pt3:eta3:phi3:dphi:dphi3:pt1alt:eta1alt:phi1alt:pt2alt:eta2alt:phi2alt:pt3alt:eta3alt:phi3alt:dphialt:dphi3alt:pthat");
+   nt = fs->make<TNtuple>("nt","","pt1:eta1:phi1:parton1:pt2:eta2:phi2:parton2:pt3:eta3:phi3:dphi:dphi3:pt1alt:eta1alt:phi1alt:pt2alt:eta2alt:phi2alt:pt3alt:eta3alt:phi3alt:dphialt:dphi3alt:pthat");
    
    // centrality_ = 0;
    std::cout<<"done beginjob"<<std::endl;
